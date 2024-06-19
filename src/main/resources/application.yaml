@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: get-science-backend
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  #  datasource:
+  #    url: jdbc:h2:file:./src/main/resources/database/GetScienceTestDb #jdbc:h2:mem:test # H2 in-memory database URL
+  #    driver-class-name: org.h2.Driver # H2 driver class name
+  #    username: sa # H2 default username
+  #    password:  # H2 default password (no password)
+  config:
+    import: optional:file:.env[.properties]
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+
+
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http://localhost:8080/auth/realms/science
+
+#keycloak:
+#  auth-server-url: http://localhost:8080/auth
+#  realm: science
+#  resource: myclient
+#  credentials:
+#    secret: myclientsecret
+#  public-client: true
+#  ssl-required: external
+#  bearer-only: true
+
+
+logging:
+  level:
+    root: debug
+    com.getscience.getsciencebackend.util.exception_handling: debug
+
+
+sentry:
+  dsn: http://8043575afe824df3b74e32d2fc2ca532@localhost:9000/2
+  environment: development
+#  send-default-pii: true
+#  traces-sample-rate: 1.0
+  use-git-commit-id-as-release: false
+  in-app-includes: com.getscience.getsciencebackend
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
