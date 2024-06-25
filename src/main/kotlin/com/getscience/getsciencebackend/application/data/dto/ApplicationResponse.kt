@@ -10,6 +10,7 @@ import java.sql.Timestamp
 data class ApplicationResponse(
     val applicationId: Long,
     val eventId: Long,
+    val eventName: String,
     val profileId: Long,
     val status: String,
     val submissionDate: Timestamp,
@@ -23,6 +24,7 @@ data class ApplicationResponse(
             return ApplicationResponse(
                 applicationId = application.applicationId,
                 eventId = application.event.eventId,
+                eventName = application.event.title,
                 profileId = application.profile.profileId,
                 status = application.status,
                 submissionDate = application.submissionDate,

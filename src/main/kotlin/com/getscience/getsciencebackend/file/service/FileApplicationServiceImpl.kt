@@ -114,7 +114,7 @@ class FileApplicationServiceImpl(
     fun verifyFileAccessRightsAndGetFileApplication(fileId: Long, email: String): FileApplication {
         val fileApplication =
             fileApplicationRepository.findById(fileId).orElseThrow { RuntimeException("File not found") }
-        if (fileApplication.application.profile.account.email != email || fileApplication.application.event.organizer.account.email != email) {
+        if (fileApplication.application.profile.account.email != email && fileApplication.application.event.organizer.account.email != email) {
             throw IllegalArgumentException("Unauthorized access")
         }
         return fileApplication;
