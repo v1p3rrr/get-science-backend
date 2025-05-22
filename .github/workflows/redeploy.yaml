@@ -1,0 +1,27 @@
+name: Redeploy backend
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to production server over SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cd /get-science/get-science-backend
+            
+            git fetch origin
+            git checkout master || git checkout -b master
+            git reset --hard origin/master
+            
+            docker compose -f /get-science/get-science-backend/docker-compose.yml down
+            docker rmi -f ${{ secrets.DOCKER_IMAGE_NAME }} || true
+            docker pull ${{ secrets.DOCKER_IMAGE_NAME }}:latest
+            docker compose -f /get-science/get-science-backend/docker-compose.yml up -d --remove-orphans

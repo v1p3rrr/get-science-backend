@@ -1,0 +1,104 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  #  datasource:
+  #    url: jdbc:h2:file:./src/main/resources/database/GetScienceTestDb #jdbc:h2:mem:test # H2 in-memory database URL
+  #    driver-class-name: org.h2.Driver # H2 driver class name
+  #    username: sa # H2 default username
+  #    password:  # H2 default password (no password)
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  mail:
+    host: smtp.yandex.ru
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            transport:
+              protocol: smtp
+    default-encoding: UTF-8
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
+
+
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http://localhost:8080/auth/realms/science
+
+#keycloak:
+#  auth-server-url: http://localhost:8080/auth
+#  realm: science
+#  resource: myclient
+#  credentials:
+#    secret: myclientsecret
+#  public-client: true
+#  ssl-required: external
+#  bearer-only: true
+
+
+logging:
+  level:
+    root: info # Уровень логирования по умолчанию для dev
+    com.getscience: debug # Более детальное логирование для пакетов приложения в dev
+    com.getscience.getsciencebackend.util.exception_handling: info
+    org.hibernate.SQL: info
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+
+sentry:
+  dsn: ${SENTRY_DSN}
+  environment: development
+#  send-default-pii: true
+#  traces-sample-rate: 1.0
+  use-git-commit-id-as-release: false
+  in-app-includes: com.getscience.getsciencebackend
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true # Включаем эндпоинт Prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true # Включаем экспорт метрик в Prometheus
+  metrics:
+    tags: # Глобальные теги для всех метрик
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true # Включаем гистограммы для HTTP запросов
+
+frontend:
+  base-url: http://localhost:3000
+
+moderators:
+  accounts:
+    - email: ${MODER_EMAIL_DEFAULT}
+      password: ${MODER_PASSWORD_DEFAULT}
+    - email: "2${MODER_EMAIL_DEFAULT}"
+      password: "${MODER_PASSWORD_DEFAULT}2"

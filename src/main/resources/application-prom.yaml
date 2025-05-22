@@ -1,0 +1,91 @@
+spring:
+  config:
+    activate:
+      on-profile: prom
+  application:
+    name: get-science-backend
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+
+  mail:
+    host: smtp.yandex.ru
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            transport:
+              protocol: smtp
+    default-encoding: UTF-8
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
+
+logging:
+  level:
+    root: info
+    com.getscience: info
+    com.getscience.getsciencebackend.util.exception_handling: info
+    org.hibernate.SQL: info
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+
+sentry:
+  dsn: ${SENTRY_DSN}
+  environment: production
+  send-default-pii: true
+  traces-sample-rate: 1.0
+  use-git-commit-id-as-release: false
+  in-app-includes: com.getscience.getsciencebackend
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,beans
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        app.business.operation.time: true
+        app.external.service.time: true
+    enable:
+      jvm: true
+      system: true
+      process: true
+      logback: true
+
+frontend:
+  base-url: ${FRONTEND_BASE_URL}
+
+moderators:
+  accounts:
+    - email: ${MODER_EMAIL_DEFAULT}
+      password: ${MODER_PASSWORD_DEFAULT}
+    - email: "2${MODER_EMAIL_DEFAULT}"
+      password: "${MODER_PASSWORD_DEFAULT}2"

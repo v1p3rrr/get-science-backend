@@ -1,0 +1,42 @@
+groups:
+  - name: application
+    rules:
+      # Алерт на высокую частоту ошибок
+      - alert: HighErrorRate
+        expr: rate(http_server_requests_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Высокая частота ошибок"
+          description: "Частота ошибок превысила 10% за последние 5 минут"
+
+      # Алерт на медленные ответы
+      - alert: SlowResponseTime
+        expr: http_server_requests_seconds{quantile="0.9"} > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Медленные ответы API"
+          description: "90-й перцентиль времени ответа превысил 1 секунду"
+
+      # Алерт на проблемы с кэшем
+      - alert: CacheIssues
+        expr: rate(app_cache_errors_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Проблемы с кэшем"
+          description: "Обнаружены ошибки при работе с кэшем"
+
+      # Алерт на проблемы с внешними сервисами
+      - alert: ExternalServiceIssues
+        expr: rate(app_external_service_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Проблемы с внешними сервисами"
+          description: "Высокая частота ошибок при вызовах внешних сервисов" 

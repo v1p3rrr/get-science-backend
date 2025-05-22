@@ -1,0 +1,83 @@
+version: '2'
+
+services:
+  sentry-redis:
+    container_name: sentry-redis
+    image: redis
+    networks:
+      - common
+
+  sentry-postgres:
+    container_name: sentry-postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: sentry
+      POSTGRES_PASSWORD: sentry
+      POSTGRES_DB: sentry
+    volumes:
+      - sentry-postgres-data:/var/lib/postgresql/data
+    networks:
+      - common
+
+  sentry:
+    container_name: sentry
+    image: sentry
+    links:
+     - sentry-redis
+     - sentry-postgres
+    ports:
+     - "9000:9000"
+    environment:
+      SENTRY_SECRET_KEY: '+gSHBm5d4Jz0aHJYb1zvgO1n28DxiZ6zVfGbHtjHt5I='
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: sentry
+      SENTRY_REDIS_HOST: sentry-redis
+    volumes:
+      - sentry-data:/data
+      - sentry-files:/var/lib/sentry/files
+    networks:
+      - common
+
+  sentry-cron:
+    container_name: sentry-cron
+    image: sentry
+    links:
+     - sentry-redis
+     - sentry-postgres
+    command: "sentry run cron"
+    environment:
+      SENTRY_SECRET_KEY: '+gSHBm5d4Jz0aHJYb1zvgO1n28DxiZ6zVfGbHtjHt5I='
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: sentry
+      SENTRY_REDIS_HOST: sentry-redis
+    networks:
+      - common
+
+  sentry-worker:
+    container_name: sentry-worker
+    image: sentry
+    links:
+     - sentry-redis
+     - sentry-postgres
+    command: "sentry run worker"
+    environment:
+      SENTRY_SECRET_KEY: '+gSHBm5d4Jz0aHJYb1zvgO1n28DxiZ6zVfGbHtjHt5I='
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: sentry
+      SENTRY_REDIS_HOST: sentry-redis
+    networks:
+      - common
+
+volumes:
+  sentry-postgres-data:
+  sentry-data:
+  sentry-files:
+
+networks:
+  common:
+    driver: bridge
+  app-network:
+    external: true

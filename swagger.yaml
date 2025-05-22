@@ -1,0 +1,2787 @@
+openapi: 3.0.1
+info:
+  title: Get Science API
+  description: API платформы для научных и образовательных мероприятий
+  version: 1.0.0
+  contact:
+    name: Get Science Team
+    url: https://get-science-events.ru
+servers:
+  - url: https://get-science-events.ru/api/v1
+    description: Основной сервер
+
+tags:
+  - name: applications
+    description: Управление заявками на участие в мероприятиях
+  - name: events
+    description: Управление мероприятиями
+  - name: files
+    description: Управление файлами
+  - name: notifications
+    description: Управление уведомлениями
+  - name: auth
+    description: Авторизация и управление пользователями
+  - name: address
+    description: Поиск и работа с адресами
+  - name: chats
+    description: Управление чатами
+
+paths:
+  /applications/submit:
+    post:
+      tags:
+        - applications
+      summary: Создание новой заявки на участие в мероприятии
+      description: Создает новую заявку на участие в мероприятии
+      operationId: submitApplication
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                applicationRequest:
+                  $ref: '#/components/schemas/ApplicationRequest'
+                fileApplicationFileMetadataDTO:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ApplicationFileMetadataDTO'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Успешное создание заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          description: Ошибка валидации данных
+
+  /applications/{applicationId}:
+    put:
+      tags:
+        - applications
+      summary: Обновление существующей заявки
+      description: Обновляет существующую заявку
+      operationId: updateApplication
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                applicationRequest:
+                  $ref: '#/components/schemas/ApplicationRequest'
+                fileApplicationFileMetadataDTO:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ApplicationFileMetadataDTO'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Успешное обновление заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          description: Ошибка валидации данных
+        '404':
+          description: Заявка не найдена
+    get:
+      tags:
+        - applications
+      summary: Получение информации о заявке
+      description: Получает информацию о заявке по её идентификатору
+      operationId: getApplicationById
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация о заявке успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        '404':
+          description: Заявка не найдена
+    delete:
+      tags:
+        - applications
+      summary: Удаление заявки
+      description: Удаляет заявку по её идентификатору
+      operationId: deleteApplication
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Заявка успешно удалена
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '404':
+          description: Заявка не найдена
+
+  /applications/{applicationId}/update-organizer:
+    put:
+      tags:
+        - applications
+      summary: Обновление заявки организатором
+      description: Позволяет организатору мероприятия обновить заявку
+      operationId: updateApplicationByOrganizer
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+      responses:
+        '200':
+          description: Заявка успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          description: Ошибка валидации данных
+        '404':
+          description: Заявка не найдена
+
+  /applications/{applicationId}/with-applicant:
+    get:
+      tags:
+        - applications
+      summary: Получение детальной информации о заявке с данными заявителя
+      description: Получает детальную информацию о заявке вместе с данными заявителя
+      operationId: getApplicationWithApplicant
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationDetailWithApplicantResponse'
+        '404':
+          description: Заявка не найдена
+
+  /applications/{applicationId}/with-organizer:
+    get:
+      tags:
+        - applications
+      summary: Получение детальной информации о заявке с данными организатора
+      description: Получает детальную информацию о заявке вместе с данными организатора
+      operationId: getApplicationWithOrganizer
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationDetailWithOrganizerResponse'
+        '404':
+          description: Заявка не найдена
+
+  /applications/event/{eventId}:
+    get:
+      tags:
+        - applications
+      summary: Получение списка заявок для мероприятия
+      description: Получает список всех заявок для указанного мероприятия
+      operationId: getApplicationsByEvent
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Список заявок успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponse'
+        '404':
+          description: Мероприятие не найдено
+
+  /applications/profile/{profileId}:
+    get:
+      tags:
+        - applications
+      summary: Получение списка заявок для профиля
+      description: Получает список всех заявок для указанного профиля
+      operationId: getApplicationsByProfile
+      parameters:
+        - name: profileId
+          in: path
+          description: Идентификатор профиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Список заявок успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          description: Ошибка валидации данных
+        '404':
+          description: Профиль не найден
+
+  /applications/organizer:
+    get:
+      tags:
+        - applications
+      summary: Получение списка заявок для текущего организатора
+      description: Получает список всех заявок для текущего организатора мероприятий
+      operationId: getApplicationsByOrganizer
+      responses:
+        '200':
+          description: Список заявок успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponse'
+        '401':
+          description: Не авторизован
+
+  /applications/applicant:
+    get:
+      tags:
+        - applications
+      summary: Получение списка заявок для текущего заявителя
+      description: Получает список всех заявок для текущего заявителя
+      operationId: getApplicationsByApplicant
+      responses:
+        '200':
+          description: Список заявок успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponse'
+        '401':
+          description: Не авторизован
+
+  /events:
+    post:
+      tags:
+        - events
+      summary: Создание нового мероприятия
+      description: Создает новое мероприятие с возможностью загрузки файлов
+      operationId: createEventMultipart
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                eventRequest:
+                  $ref: '#/components/schemas/EventRequest'
+                fileEventRequest:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FileEventRequest'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Мероприятие успешно создано
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Ошибка валидации данных
+    get:
+      tags:
+        - events
+      summary: Получение списка всех мероприятий
+      description: Получает список всех мероприятий с пагинацией
+      operationId: getAllEventsPaged
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Размер страницы
+          required: false
+          schema:
+            type: integer
+            default: 12
+      responses:
+        '200':
+          description: Список мероприятий успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableResponseEventResponse'
+
+  /events/{eventId}:
+    put:
+      tags:
+        - events
+      summary: Обновление мероприятия
+      description: Обновляет существующее мероприятие
+      operationId: updateEventMultipart
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                eventRequest:
+                  $ref: '#/components/schemas/EventRequest'
+                fileEventRequest:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FileEventRequest'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Мероприятие успешно обновлено
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Ошибка валидации данных
+        '404':
+          description: Мероприятие не найдено
+    get:
+      tags:
+        - events
+      summary: Получение мероприятия по идентификатору
+      description: Получает информацию о мероприятии по его идентификатору
+      operationId: getEventById
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация о мероприятии успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          description: Мероприятие не найдено
+    delete:
+      tags:
+        - events
+      summary: Удаление мероприятия
+      description: Удаляет мероприятие по его идентификатору
+      operationId: deleteEvent
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Мероприятие успешно удалено
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Ошибка валидации данных
+        '404':
+          description: Мероприятие не найдено
+
+  /events/{eventId}/recommendations:
+    get:
+      tags:
+        - events
+      summary: Получение рекомендаций мероприятий
+      description: Получает список рекомендуемых мероприятий на основе указанного мероприятия
+      operationId: searchEvents
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Список рекомендаций успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventResponse'
+        '404':
+          description: Мероприятие не найдено
+
+  /events/{eventId}/files:
+    post:
+      tags:
+        - events
+      summary: Добавление файла к мероприятию
+      description: Добавляет файл к указанному мероприятию
+      operationId: addFileToEvent
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileEventRequest'
+      responses:
+        '200':
+          description: Файл успешно добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileEventResponse'
+        '400':
+          description: Ошибка валидации данных
+        '404':
+          description: Мероприятие не найдено
+    get:
+      tags:
+        - events
+      summary: Получение файлов мероприятия
+      description: Получает список файлов, прикрепленных к мероприятию
+      operationId: getFilesByEvent
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Список файлов успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileEventResponse'
+        '404':
+          description: Мероприятие не найдено
+
+  /events/files/{fileId}:
+    get:
+      tags:
+        - events
+      summary: Получение файла мероприятия по идентификатору
+      description: Получает информацию о файле мероприятия по его идентификатору
+      operationId: getFileEventById
+      parameters:
+        - name: fileId
+          in: path
+          description: Идентификатор файла
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация о файле успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileEventResponse'
+        '404':
+          description: Файл не найден
+
+  /events/my-events:
+    get:
+      tags:
+        - events
+      summary: Получение списка мероприятий текущего пользователя
+      description: Получает список мероприятий, созданных текущим пользователем, с пагинацией
+      operationId: getEventsByJwtPaged
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Размер страницы
+          required: false
+          schema:
+            type: integer
+            default: 12
+      responses:
+        '200':
+          description: Список мероприятий успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableResponseEventResponse'
+        '401':
+          description: Не авторизован
+
+  /events/search:
+    post:
+      tags:
+        - events
+      summary: Расширенный поиск мероприятий
+      description: Поиск мероприятий с поддержкой множественных фильтров
+      operationId: searchEventsWithMultipleFilters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventFilterRequest'
+      responses:
+        '200':
+          description: Результаты поиска успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableResponseEventResponse'
+
+  /events/organizer/{organizerId}:
+    get:
+      tags:
+        - events
+      summary: Получение списка мероприятий организатора
+      description: Получает список мероприятий, созданных указанным организатором, с пагинацией
+      operationId: getEventsByOrganizerPaged
+      parameters:
+        - name: organizerId
+          in: path
+          description: Идентификатор организатора
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Размер страницы
+          required: false
+          schema:
+            type: integer
+            default: 12
+      responses:
+        '200':
+          description: Список мероприятий успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableResponseEventResponse'
+        '404':
+          description: Организатор не найден
+
+  /events/{eventId}/with-people:
+    get:
+      tags:
+        - events
+      summary: Получение мероприятия с информацией о рецензентах и соорганизаторах
+      description: Получает информацию о мероприятии вместе с данными о рецензентах и соорганизаторах
+      operationId: getEventWithReviewersAndCoowners
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          description: Мероприятие не найдено
+
+  /events/filter-metadata:
+    get:
+      tags:
+        - events
+      summary: Получение метаданных для фильтрации
+      description: Получает метаданные для построения фильтров мероприятий
+      operationId: getEventFilterMetadata
+      responses:
+        '200':
+          description: Метаданные успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventFilterMetadataResponse'
+
+  /events/{eventId}/calendar:
+    get:
+      tags:
+        - events
+      summary: Экспорт мероприятия в формате iCalendar
+      description: Экспортирует мероприятие в формате iCalendar (.ics)
+      operationId: exportEventCalendar
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Файл iCalendar успешно сгенерирован
+          content:
+            text/calendar:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Мероприятие не найдено
+
+  /events/{eventId}/participants/export:
+    get:
+      tags:
+        - events
+      summary: Экспорт списка участников в Excel
+      description: Экспортирует список участников мероприятия в Excel
+      operationId: exportEventParticipantsExcel
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Файл Excel успешно сгенерирован
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Не авторизован
+        '404':
+          description: Мероприятие не найдено
+
+  /files/applications:
+    post:
+      tags:
+        - files
+      summary: Создание метаданных файла заявки
+      description: Создает метаданные для файла, прикрепленного к заявке
+      operationId: createFileApplication
+      parameters:
+        - name: applicationId
+          in: query
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileApplicationRequest'
+      responses:
+        '200':
+          description: Метаданные успешно созданы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileApplicationResponse'
+        '400':
+          description: Ошибка валидации данных
+        '404':
+          description: Заявка не найдена
+
+  /files/applications/{applicationId}:
+    get:
+      tags:
+        - files
+      summary: Получение файлов заявки
+      description: Получает список файлов, прикрепленных к заявке
+      operationId: getFileApplicationsByApplication
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Список файлов успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileApplicationResponse'
+        '404':
+          description: Заявка не найдена
+
+  /files/applications/download/{fileId}/direct-link:
+    get:
+      tags:
+        - files
+      summary: Получение прямой ссылки на файл заявки
+      description: Получает предварительно подписанный URL для скачивания файла заявки
+      operationId: getPresignedUrlForApplicationFile
+      parameters:
+        - name: fileId
+          in: path
+          description: Идентификатор файла
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: URL успешно получен
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Файл не найден
+
+  /files/applications/download/{fileId}:
+    get:
+      tags:
+        - files
+      summary: Скачивание файла заявки
+      description: Скачивает файл, прикрепленный к заявке
+      operationId: downloadApplicationFile
+      parameters:
+        - name: fileId
+          in: path
+          description: Идентификатор файла
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Файл успешно скачан
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Файл не найден
+
+  /files/events/download/{fileId}/direct-link:
+    get:
+      tags:
+        - files
+      summary: Получение прямой ссылки на файл мероприятия
+      description: Получает предварительно подписанный URL для скачивания файла мероприятия
+      operationId: getPresignedUrlForEventFile
+      parameters:
+        - name: fileId
+          in: path
+          description: Идентификатор файла
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: URL успешно получен
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Файл не найден
+
+  /files/events/download/{fileId}:
+    get:
+      tags:
+        - files
+      summary: Скачивание файла мероприятия
+      description: Скачивает файл, прикрепленный к мероприятию
+      operationId: downloadEventFile
+      parameters:
+        - name: fileId
+          in: path
+          description: Идентификатор файла
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Файл успешно скачан
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Файл не найден
+
+  /files/applications/{fileId}:
+    delete:
+      tags:
+        - files
+      summary: Удаление файла заявки
+      description: Удаляет файл, прикрепленный к заявке
+      operationId: deleteFile
+      parameters:
+        - name: fileId
+          in: path
+          description: Идентификатор файла
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Файл успешно удален
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '404':
+          description: Файл не найден
+
+  /files/applications/{applicationId}/doc-required/{docRequiredId}:
+    delete:
+      tags:
+        - files
+      summary: Удаление файлов по идентификатору требуемого документа
+      description: Удаляет файлы заявки, соответствующие указанному требуемому документу
+      operationId: deleteFilesByDocRequiredId
+      parameters:
+        - name: applicationId
+          in: path
+          description: Идентификатор заявки
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: docRequiredId
+          in: path
+          description: Идентификатор требуемого документа
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Файлы успешно удалены
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '404':
+          description: Заявка или требуемый документ не найдены
+
+  /notifications:
+    get:
+      tags:
+        - notifications
+      summary: Получение уведомлений
+      description: Получает список уведомлений с пагинацией
+      operationId: getNotifications
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Размер страницы
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Список уведомлений успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableResponseNotification'
+        '401':
+          description: Не авторизован
+    delete:
+      tags:
+        - notifications
+      summary: Удаление всех уведомлений
+      description: Удаляет все уведомления текущего пользователя
+      operationId: deleteAllNotifications
+      responses:
+        '204':
+          description: Все уведомления успешно удалены
+        '401':
+          description: Не авторизован
+
+  /notifications/unread/count:
+    get:
+      tags:
+        - notifications
+      summary: Получение количества непрочитанных уведомлений
+      description: Получает количество непрочитанных уведомлений для текущего пользователя
+      operationId: getUnreadNotificationsCount
+      responses:
+        '200':
+          description: Количество непрочитанных уведомлений успешно получено
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '401':
+          description: Не авторизован
+
+  /notifications/{notificationId}/read:
+    put:
+      tags:
+        - notifications
+      summary: Отметка уведомления как прочитанного
+      description: Отмечает уведомление как прочитанное
+      operationId: markAsRead
+      parameters:
+        - name: notificationId
+          in: path
+          description: Идентификатор уведомления
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Уведомление успешно отмечено как прочитанное
+        '401':
+          description: Не авторизован
+        '404':
+          description: Уведомление не найдено
+
+  /notifications/read-all:
+    put:
+      tags:
+        - notifications
+      summary: Отметка всех уведомлений как прочитанных
+      description: Отмечает все уведомления текущего пользователя как прочитанные
+      operationId: markAllAsRead
+      responses:
+        '200':
+          description: Все уведомления успешно отмечены как прочитанные
+        '401':
+          description: Не авторизован
+
+  /notifications/{notificationId}:
+    delete:
+      tags:
+        - notifications
+      summary: Удаление уведомления
+      description: Удаляет уведомление по его идентификатору
+      operationId: deleteNotification
+      parameters:
+        - name: notificationId
+          in: path
+          description: Идентификатор уведомления
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Уведомление успешно удалено
+        '401':
+          description: Не авторизован
+        '404':
+          description: Уведомление не найдено
+
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Регистрация пользователя
+      description: Регистрирует нового пользователя
+      operationId: registerUser
+      parameters:
+        - name: Accept-Language
+          in: header
+          description: Язык для локализации сообщений
+          required: false
+          schema:
+            type: string
+            default: ru-RU
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Ошибка валидации данных
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Вход в систему
+      description: Аутентифицирует пользователя и возвращает токены доступа
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '401':
+          description: Неверные учетные данные
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Выход из системы
+      description: Разлогинивает пользователя, инвалидируя его refresh-токен
+      operationId: logout
+      parameters:
+        - name: refreshToken
+          in: query
+          description: Refresh-токен для инвалидации
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Успешный выход из системы
+        '401':
+          description: Не авторизован
+
+  /auth/logout/all:
+    delete:
+      tags:
+        - auth
+      summary: Выход из всех сессий
+      description: Разлогинивает пользователя из всех активных сессий
+      operationId: logoutAllSessions
+      responses:
+        '204':
+          description: Успешный выход из всех сессий
+        '401':
+          description: Не авторизован
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - auth
+      summary: Обновление access-токена
+      description: Обновляет access-токен с помощью refresh-токена
+      operationId: refreshAccessToken
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Refresh-токен
+      responses:
+        '200':
+          description: Access-токен успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '401':
+          description: Невалидный refresh-токен
+
+  /auth/change-password:
+    put:
+      tags:
+        - auth
+      summary: Изменение пароля
+      description: Изменяет пароль авторизованного пользователя
+      operationId: changePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Пароль успешно изменен
+        '400':
+          description: Ошибка валидации данных
+        '401':
+          description: Не авторизован
+
+  /auth/profile:
+    get:
+      tags:
+        - auth
+      summary: Получение профиля по email
+      description: Получает информацию о профиле пользователя по его email
+      operationId: getProfileByEmail
+      parameters:
+        - name: email
+          in: query
+          description: Email пользователя
+          required: true
+          schema:
+            type: string
+            format: email
+      responses:
+        '200':
+          description: Информация о профиле успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '404':
+          description: Профиль не найден
+    put:
+      tags:
+        - auth
+      summary: Обновление профиля
+      description: Обновляет информацию о профиле текущего пользователя
+      operationId: updateProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+      responses:
+        '200':
+          description: Профиль успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '400':
+          description: Ошибка валидации данных
+        '401':
+          description: Не авторизован
+  /auth/profile/me:
+    get:
+      tags:
+        - auth
+      summary: Получение профиля текущего пользователя
+      description: Получает информацию о профиле текущего пользователя
+      operationId: getProfileByJwt
+      responses:
+        '200':
+          description: Информация о профиле успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          description: Не авторизован
+
+  /auth/profile/{id}:
+    get:
+      tags:
+        - auth
+      summary: Получение профиля по идентификатору
+      description: Получает информацию о профиле пользователя по его идентификатору
+      operationId: getProfileById
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор профиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация о профиле успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '404':
+          description: Профиль не найден
+
+  /auth/profile/avatar:
+    post:
+      tags:
+        - auth
+      summary: Загрузка аватара
+      description: Загружает аватар для профиля текущего пользователя
+      operationId: uploadAvatar
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Файл изображения для аватара
+      responses:
+        '200':
+          description: Аватар успешно загружен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '400':
+          description: Ошибка валидации данных
+        '401':
+          description: Не авторизован
+    get:
+      tags:
+        - auth
+      summary: Получение URL аватара
+      description: Получает предварительно подписанный URL для аватара текущего пользователя
+      operationId: getAvatarPresignedUrl
+      responses:
+        '200':
+          description: URL успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+        '401':
+          description: Не авторизован
+        '404':
+          description: Аватар не найден
+
+  /auth/profile/avatar/{profileId}:
+    get:
+      tags:
+        - auth
+      summary: Получение URL аватара по идентификатору профиля
+      description: Получает предварительно подписанный URL для аватара указанного пользователя
+      operationId: getAvatarPresignedUrlByProfileId
+      parameters:
+        - name: profileId
+          in: path
+          description: Идентификатор профиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: URL успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+        '404':
+          description: Аватар не найден
+
+  /auth/verify-email:
+    post:
+      tags:
+        - auth
+      summary: Подтверждение email
+      description: Подтверждает email пользователя с помощью токена верификации
+      operationId: verifyEmail
+      parameters:
+        - name: token
+          in: query
+          description: Токен верификации
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email успешно подтвержден
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Невалидный токен
+
+  /auth/request-password-reset:
+    post:
+      tags:
+        - auth
+      summary: Запрос на сброс пароля
+      description: Запрашивает сброс пароля для указанного email
+      operationId: requestPasswordReset
+      parameters:
+        - name: email
+          in: query
+          description: Email пользователя
+          required: true
+          schema:
+            type: string
+            format: email
+        - name: Accept-Language
+          in: header
+          description: Язык для локализации сообщений
+          required: false
+          schema:
+            type: string
+            default: ru-RU
+      responses:
+        '200':
+          description: Запрос на сброс пароля успешно обработан
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Ошибка валидации данных
+
+  /auth/reset-password:
+    post:
+      tags:
+        - auth
+      summary: Сброс пароля
+      description: Сбрасывает пароль пользователя с помощью токена сброса
+      operationId: resetPassword
+      parameters:
+        - name: token
+          in: query
+          description: Токен сброса пароля
+          required: true
+          schema:
+            type: string
+        - name: newPassword
+          in: query
+          description: Новый пароль
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Пароль успешно сброшен
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Невалидный токен или ошибка валидации пароля
+
+  /auth/users:
+    get:
+      tags:
+        - auth
+      summary: Поиск пользователей
+      description: Ищет пользователей по email, имени и фамилии
+      operationId: searchProfiles
+      parameters:
+        - name: email
+          in: query
+          description: Email пользователя
+          required: false
+          schema:
+            type: string
+            format: email
+        - name: firstName
+          in: query
+          description: Имя пользователя
+          required: false
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          description: Фамилия пользователя
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Результаты поиска успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          description: Не авторизован
+
+  /auth/users/{profileId}:
+    get:
+      tags:
+        - auth
+      summary: Получение профиля с мероприятиями
+      description: Получает информацию о профиле пользователя вместе с его мероприятиями
+      operationId: getProfileWithEvents
+      parameters:
+        - name: profileId
+          in: path
+          description: Идентификатор профиля
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '404':
+          description: Профиль не найден
+
+  /address/suggest:
+    get:
+      tags:
+        - address
+      summary: Поиск подсказок адресов
+      description: Возвращает подсказки адресов по заданному поисковому запросу
+      operationId: suggest
+      parameters:
+        - name: query
+          in: query
+          description: Поисковый запрос
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Ограничение количества результатов
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        '200':
+          description: Список подсказок успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressSuggestionDTO'
+        '400':
+          description: Пустой поисковый запрос
+
+  /chats/event/{eventId}/find:
+    get:
+      tags:
+        - chats
+      summary: Поиск чата по мероприятию
+      description: Находит чат для указанного мероприятия и текущего пользователя
+      operationId: findChatByEvent
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Чат успешно найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '401':
+          description: Не авторизован
+        '404':
+          description: Чат не найден
+
+  /chats/event/{eventId}/message:
+    post:
+      tags:
+        - chats
+      summary: Создание чата и отправка сообщения
+      description: Создает чат для мероприятия (если не существует) и отправляет сообщение
+      operationId: createChatAndSendMessage
+      parameters:
+        - name: eventId
+          in: path
+          description: Идентификатор мероприятия
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageRequest'
+      responses:
+        '201':
+          description: Сообщение успешно отправлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageResponse'
+        '401':
+          description: Не авторизован
+        '404':
+          description: Мероприятие не найдено
+
+  /chats/{chatId}/messages:
+    get:
+      tags:
+        - chats
+      summary: Получение сообщений чата
+      description: Получает сообщения указанного чата с пагинацией
+      operationId: getMessages
+      parameters:
+        - name: chatId
+          in: path
+          description: Идентификатор чата
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Размер страницы
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Сообщения успешно получены
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChatMessageResponse'
+                  pageable:
+                    type: object
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  last:
+                    type: boolean
+                  size:
+                    type: integer
+                  number:
+                    type: integer
+                  sort:
+                    type: object
+                  numberOfElements:
+                    type: integer
+                  first:
+                    type: boolean
+                  empty:
+                    type: boolean
+        '401':
+          description: Не авторизован
+        '403':
+          description: Доступ запрещен
+        '404':
+          description: Чат не найден
+
+  /chats/my:
+    get:
+      tags:
+        - chats
+      summary: Получение чатов текущего пользователя
+      description: Получает список чатов текущего пользователя с пагинацией
+      operationId: getMyChats
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы (начиная с 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Размер страницы
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Список чатов успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChatResponse'
+                  pageable:
+                    type: object
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  last:
+                    type: boolean
+                  size:
+                    type: integer
+                  number:
+                    type: integer
+                  sort:
+                    type: object
+                  numberOfElements:
+                    type: integer
+                  first:
+                    type: boolean
+                  empty:
+                    type: boolean
+        '401':
+          description: Не авторизован
+
+  /chats/{chatId}/read:
+    post:
+      tags:
+        - chats
+      summary: Отметка чата как прочитанного
+      description: Отмечает чат как прочитанный для текущего пользователя
+      operationId: markChatAsRead
+      parameters:
+        - name: chatId
+          in: path
+          description: Идентификатор чата
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Чат успешно отмечен как прочитанный
+        '401':
+          description: Не авторизован
+        '403':
+          description: Доступ запрещен
+        '404':
+          description: Чат не найден
+
+  /chats/{chatId}/participants:
+    get:
+      tags:
+        - chats
+      summary: Получение участников чата
+      description: Получает профили участников чата
+      operationId: getChatParticipantProfiles
+      parameters:
+        - name: chatId
+          in: path
+          description: Идентификатор чата
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Список профилей успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileResponse'
+        '401':
+          description: Не авторизован
+        '403':
+          description: Доступ запрещен
+        '404':
+          description: Чат не найден
+
+  /chats/unread-count:
+    get:
+      tags:
+        - chats
+      summary: Получение количества непрочитанных чатов
+      description: Получает количество непрочитанных чатов для текущего пользователя
+      operationId: getUnreadChatsCount
+      responses:
+        '200':
+          description: Количество непрочитанных чатов успешно получено
+          content:
+            application/json:
+              schema:
+                type: integer
+        '401':
+          description: Не авторизован
+
+  /chats/{chatId}/details:
+    get:
+      tags:
+        - chats
+      summary: Получение деталей чата
+      description: Получает подробную информацию о чате
+      operationId: getChatDetails
+      parameters:
+        - name: chatId
+          in: path
+          description: Идентификатор чата
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация о чате успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '401':
+          description: Не авторизован
+        '403':
+          description: Доступ запрещен
+        '404':
+          description: Чат не найден
+
+components:
+  schemas:
+    ApplicationRequest:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          description: Идентификатор мероприятия
+        profileId:
+          type: integer
+          format: int64
+          description: Идентификатор профиля
+          nullable: true
+        status:
+          type: string
+          description: Статус заявки
+        submissionDate:
+          type: string
+          format: date-time
+          description: Дата подачи заявки
+        message:
+          type: string
+          description: Сообщение от заявителя
+          nullable: true
+        isObserver:
+          type: boolean
+          description: Является ли наблюдателем
+        fileApplications:
+          type: array
+          description: Файлы заявки
+          items:
+            $ref: '#/components/schemas/FileApplicationRequest'
+        verdict:
+          type: string
+          description: Решение по заявке
+          nullable: true
+
+    ApplicationResponse:
+      type: object
+      properties:
+        applicationId:
+          type: integer
+          format: int64
+          description: Идентификатор заявки
+        eventId:
+          type: integer
+          format: int64
+          description: Идентификатор мероприятия
+        eventName:
+          type: string
+          description: Название мероприятия
+        profileId:
+          type: integer
+          format: int64
+          description: Идентификатор профиля
+        status:
+          type: string
+          description: Статус заявки
+        submissionDate:
+          type: string
+          format: date-time
+          description: Дата подачи заявки
+        message:
+          type: string
+          description: Сообщение от заявителя
+          nullable: true
+        isObserver:
+          type: boolean
+          description: Является ли наблюдателем
+        verdict:
+          type: string
+          description: Решение по заявке
+          nullable: true
+        fileApplications:
+          type: array
+          description: Файлы заявки
+          items:
+            $ref: '#/components/schemas/FileApplicationResponse'
+
+    ApplicationFileMetadataDTO:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Тип файла
+        isEncrypted:
+          type: boolean
+          description: Зашифрован ли файл
+        docRequiredId:
+          type: integer
+          format: int64
+          description: Идентификатор требуемого документа
+
+    EventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Название мероприятия
+        description:
+          type: string
+          description: Описание мероприятия
+        organizerDescription:
+          type: string
+          description: Описание организатора
+          nullable: true
+        dateStart:
+          type: string
+          format: date-time
+          description: Дата начала мероприятия
+        dateEnd:
+          type: string
+          format: date-time
+          description: Дата окончания мероприятия
+        applicationStart:
+          type: string
+          format: date-time
+          description: Дата начала приема заявок
+        applicationEnd:
+          type: string
+          format: date-time
+          description: Дата окончания приема заявок
+        location:
+          type: string
+          description: Место проведения
+        type:
+          type: string
+          description: Тип мероприятия
+          enum:
+            - CONFERENCE
+            - SEMINAR
+            - WORKSHOP
+            - COURSE
+            - OTHER
+        theme:
+          type: string
+          description: Тема мероприятия
+          nullable: true
+        format:
+          type: string
+          description: Формат мероприятия
+          enum:
+            - ONLINE
+            - OFFLINE
+            - HYBRID
+        results:
+          type: string
+          description: Результаты мероприятия
+          nullable: true
+        observersAllowed:
+          type: boolean
+          description: Разрешены ли наблюдатели
+        status:
+          type: string
+          description: Статус мероприятия
+          enum:
+            - DRAFT
+            - PUBLISHED
+            - ARCHIVED
+        moderationStatus:
+          type: string
+          description: Статус модерации
+          enum:
+            - PENDING
+            - APPROVED
+            - REJECTED
+        hidden:
+          type: boolean
+          description: Скрыто ли мероприятие
+        organizerId:
+          type: integer
+          format: int64
+          description: Идентификатор организатора
+          nullable: true
+        documentsRequired:
+          type: array
+          description: Требуемые документы
+          items:
+            $ref: '#/components/schemas/DocRequiredRequest'
+        fileEvents:
+          type: array
+          description: Файлы мероприятия
+          items:
+            $ref: '#/components/schemas/FileEventRequest'
+        reviewers:
+          type: array
+          description: Рецензенты мероприятия
+          items:
+            $ref: '#/components/schemas/ReviewerDto'
+        coowners:
+          type: array
+          description: Соорганизаторы мероприятия
+          items:
+            $ref: '#/components/schemas/ReviewerDto'
+
+    EventResponse:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          description: Идентификатор мероприятия
+        title:
+          type: string
+          description: Название мероприятия
+        description:
+          type: string
+          description: Описание мероприятия
+        organizerDescription:
+          type: string
+          description: Описание организатора
+          nullable: true
+        dateStart:
+          type: string
+          format: date-time
+          description: Дата начала мероприятия
+        dateEnd:
+          type: string
+          format: date-time
+          description: Дата окончания мероприятия
+        applicationStart:
+          type: string
+          format: date-time
+          description: Дата начала приема заявок
+        applicationEnd:
+          type: string
+          format: date-time
+          description: Дата окончания приема заявок
+        location:
+          type: string
+          description: Место проведения
+        type:
+          type: string
+          description: Тип мероприятия
+          enum:
+            - CONFERENCE
+            - SEMINAR
+            - WORKSHOP
+            - COURSE
+            - OTHER
+        theme:
+          type: string
+          description: Тема мероприятия
+          nullable: true
+        format:
+          type: string
+          description: Формат мероприятия
+          enum:
+            - ONLINE
+            - OFFLINE
+            - HYBRID
+        results:
+          type: string
+          description: Результаты мероприятия
+          nullable: true
+        observersAllowed:
+          type: boolean
+          description: Разрешены ли наблюдатели
+        status:
+          type: string
+          description: Статус мероприятия
+          enum:
+            - DRAFT
+            - PUBLISHED
+            - ARCHIVED
+        hidden:
+          type: boolean
+          description: Скрыто ли мероприятие
+        moderationStatus:
+          type: string
+          description: Статус модерации
+          enum:
+            - PENDING
+            - APPROVED
+            - REJECTED
+        organizerId:
+          type: integer
+          format: int64
+          description: Идентификатор организатора
+        organizer:
+          type: string
+          description: Имя организатора
+        documentsRequired:
+          type: array
+          description: Требуемые документы
+          items:
+            $ref: '#/components/schemas/DocRequiredResponse'
+        fileEvents:
+          type: array
+          description: Файлы мероприятия
+          items:
+            $ref: '#/components/schemas/FileEventResponse'
+        reviewers:
+          type: array
+          description: Рецензенты мероприятия
+          items:
+            $ref: '#/components/schemas/ReviewerDto'
+        coowners:
+          type: array
+          description: Соорганизаторы мероприятия
+          items:
+            $ref: '#/components/schemas/ReviewerDto'
+
+    EventFilterRequest:
+      type: object
+      properties:
+        types:
+          type: array
+          description: Типы мероприятий
+          items:
+            type: string
+        themes:
+          type: array
+          description: Темы мероприятий
+          items:
+            type: string
+        formats:
+          type: array
+          description: Форматы мероприятий
+          items:
+            type: string
+        locations:
+          type: array
+          description: Места проведения
+          items:
+            type: string
+        title:
+          type: string
+          description: Название мероприятия
+          nullable: true
+        observersAllowed:
+          type: boolean
+          description: Разрешены ли наблюдатели
+          nullable: true
+        liveStatus:
+          type: array
+          description: Статус относительно текущей даты
+          items:
+            type: string
+            enum:
+              - NOT_STARTED
+              - IN_PROGRESS
+              - COMPLETED
+        isApplicationAvailable:
+          type: boolean
+          description: Доступен ли прием заявок
+          nullable: true
+        dateFrom:
+          type: string
+          format: date-time
+          description: Дата начала периода
+          nullable: true
+        dateTo:
+          type: string
+          format: date-time
+          description: Дата окончания периода
+          nullable: true
+        page:
+          type: integer
+          description: Номер страницы
+          default: 0
+        size:
+          type: integer
+          description: Размер страницы
+          default: 12
+
+    EventFilterMetadataResponse:
+      type: object
+      properties:
+        themes:
+          type: array
+          description: Доступные темы мероприятий
+          items:
+            type: string
+        types:
+          type: array
+          description: Доступные типы мероприятий
+          items:
+            type: string
+            enum:
+              - CONFERENCE
+              - SEMINAR
+              - WORKSHOP
+              - COURSE
+              - OTHER
+        formats:
+          type: array
+          description: Доступные форматы мероприятий
+          items:
+            type: string
+            enum:
+              - ONLINE
+              - OFFLINE
+              - HYBRID
+        locations:
+          type: array
+          description: Доступные места проведения
+          items:
+            type: string
+
+    FileApplicationRequest:
+      type: object
+      properties:
+        fileName:
+          type: string
+          description: Название файла
+        filePath:
+          type: string
+          description: Путь к файлу
+        uploadDate:
+          type: string
+          format: date-time
+          description: Дата загрузки
+        fileType:
+          type: string
+          description: Тип файла
+        isEncryptionEnabled:
+          type: boolean
+          description: Включено ли шифрование
+
+    FileApplicationResponse:
+      type: object
+      properties:
+        fileId:
+          type: integer
+          format: int64
+          description: Идентификатор файла
+        fileName:
+          type: string
+          description: Название файла
+        filePath:
+          type: string
+          description: Путь к файлу
+        uploadDate:
+          type: string
+          format: date-time
+          description: Дата загрузки
+        fileType:
+          type: string
+          description: Тип файла
+        docRequired:
+          $ref: '#/components/schemas/DocRequiredResponse'
+          nullable: true
+          description: Требуемый документ
+        isEncryptionEnabled:
+          type: boolean
+          description: Включено ли шифрование
+
+    FileEventRequest:
+      type: object
+      properties:
+        fileName:
+          type: string
+          description: Название файла
+        filePath:
+          type: string
+          description: Путь к файлу
+        uploadDate:
+          type: string
+          format: date-time
+          description: Дата загрузки
+        fileType:
+          type: string
+          description: Тип файла
+        fileCategory:
+          type: string
+          description: Категория файла
+        description:
+          type: string
+          description: Описание файла
+          nullable: true
+
+    FileEventResponse:
+      type: object
+      properties:
+        fileId:
+          type: integer
+          format: int64
+          description: Идентификатор файла
+        fileName:
+          type: string
+          description: Название файла
+        filePath:
+          type: string
+          description: Путь к файлу
+        uploadDate:
+          type: string
+          format: date-time
+          description: Дата загрузки
+        fileType:
+          type: string
+          description: Тип файла
+        fileCategory:
+          type: string
+          description: Категория файла
+        description:
+          type: string
+          description: Описание файла
+          nullable: true
+        downloadUrl:
+          type: string
+          description: URL для скачивания
+          nullable: true
+
+    DocRequiredRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название требуемого документа
+        description:
+          type: string
+          description: Описание требуемого документа
+          nullable: true
+        required:
+          type: boolean
+          description: Обязателен ли документ
+
+    DocRequiredResponse:
+      type: object
+      properties:
+        docRequiredId:
+          type: integer
+          format: int64
+          description: Идентификатор требуемого документа
+        name:
+          type: string
+          description: Название требуемого документа
+        description:
+          type: string
+          description: Описание требуемого документа
+          nullable: true
+        required:
+          type: boolean
+          description: Обязателен ли документ
+
+    ReviewerDto:
+      type: object
+      properties:
+        profileId:
+          type: integer
+          format: int64
+          description: Идентификатор профиля
+        firstName:
+          type: string
+          description: Имя
+        lastName:
+          type: string
+          description: Фамилия
+        email:
+          type: string
+          format: email
+          description: Email
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор уведомления
+        userId:
+          type: integer
+          format: int64
+          description: Идентификатор пользователя
+        type:
+          type: string
+          description: Тип уведомления
+          enum:
+            - NEW_APPLICATION
+            - APPLICATION_STATUS_CHANGED
+            - APPLICATION_UPDATED
+            - EVENT_UPDATED
+            - EVENT_DELETED
+            - APPLICATION_DELETED
+        title:
+          type: string
+          description: Заголовок уведомления
+        message:
+          type: string
+          description: Текст уведомления
+        isRead:
+          type: boolean
+          description: Прочитано ли уведомление
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания
+        entityId:
+          type: integer
+          format: int64
+          description: Идентификатор связанной сущности
+        entityType:
+          type: string
+          description: Тип связанной сущности
+          enum:
+            - EVENT
+            - APPLICATION
+        status:
+          type: string
+          description: Статус заявки
+          enum:
+            - PENDING
+            - APPROVED
+            - REJECTED
+          nullable: true
+
+    RegisterRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        role:
+          type: string
+          description: Роль пользователя
+          enum:
+            - APPLICANT
+            - ORGANIZER
+            - REVIEWER
+            - MODERATOR
+            - ADMIN
+        email:
+          type: string
+          format: email
+          description: Email пользователя
+        password:
+          type: string
+          description: Пароль пользователя
+          minLength: 8
+      required:
+        - firstName
+        - lastName
+        - role
+        - email
+        - password
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email пользователя
+        password:
+          type: string
+          description: Пароль пользователя
+      required:
+        - email
+        - password
+
+    JwtResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT токен доступа
+        refreshToken:
+          type: string
+          description: Токен обновления
+
+    ChangePasswordRequest:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+          description: Текущий пароль
+        newPassword:
+          type: string
+          description: Новый пароль
+          minLength: 8
+      required:
+        - currentPassword
+        - newPassword
+
+    ProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        aboutMe:
+          type: string
+          description: Информация о пользователе
+          nullable: true
+      required:
+        - firstName
+        - lastName
+
+    ProfileResponse:
+      type: object
+      properties:
+        profileId:
+          type: integer
+          format: int64
+          description: Идентификатор профиля
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        aboutMe:
+          type: string
+          description: Информация о пользователе
+          nullable: true
+        avatarUrl:
+          type: string
+          description: URL аватара
+          nullable: true
+        avatarPresignedUrl:
+          type: string
+          description: Предварительно подписанный URL аватара
+          nullable: true
+        role:
+          type: string
+          description: Роль пользователя
+        email:
+          type: string
+          format: email
+          description: Email пользователя
+        reviewEvents:
+          type: array
+          description: Мероприятия, для которых пользователь является рецензентом
+          items:
+            $ref: '#/components/schemas/EventShortDto'
+        coownerEvents:
+          type: array
+          description: Мероприятия, для которых пользователь является соорганизатором
+          items:
+            $ref: '#/components/schemas/EventShortDto'
+        isActive:
+          type: boolean
+          description: Активен ли профиль
+          nullable: true
+
+    EventShortDto:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          description: Идентификатор мероприятия
+        title:
+          type: string
+          description: Название мероприятия
+
+    AddressSuggestionDTO:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Полный адрес
+        latitude:
+          type: number
+          format: double
+          description: Широта
+        longitude:
+          type: number
+          format: double
+          description: Долгота
+
+    ChatMessageRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Содержимое сообщения
+      required:
+        - content
+
+    ChatMessageResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор сообщения
+        chatId:
+          type: integer
+          format: int64
+          description: Идентификатор чата
+        senderId:
+          type: integer
+          format: int64
+          description: Идентификатор отправителя
+        senderFirstName:
+          type: string
+          description: Имя отправителя
+        senderLastName:
+          type: string
+          description: Фамилия отправителя
+        content:
+          type: string
+          description: Содержимое сообщения
+        timestamp:
+          type: string
+          format: date-time
+          description: Время отправки сообщения
+
+    ChatResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор чата
+        eventId:
+          type: integer
+          format: int64
+          description: Идентификатор мероприятия
+        eventTitle:
+          type: string
+          description: Название мероприятия
+        initiatorId:
+          type: integer
+          format: int64
+          description: Идентификатор инициатора чата
+        initiatorFirstName:
+          type: string
+          description: Имя инициатора чата
+        initiatorLastName:
+          type: string
+          description: Фамилия инициатора чата
+        participantIds:
+          type: array
+          description: Идентификаторы участников чата
+          items:
+            type: integer
+            format: int64
+        lastMessage:
+          $ref: '#/components/schemas/ChatMessageResponse'
+          nullable: true
+          description: Последнее сообщение в чате
+        lastMessageTimestamp:
+          type: string
+          format: date-time
+          description: Время последнего сообщения
+          nullable: true
+        unreadCount:
+          type: integer
+          description: Количество непрочитанных сообщений
+
+    ApplicationDetailWithApplicantResponse:
+      type: object
+      properties:
+        application:
+          $ref: '#/components/schemas/ApplicationResponse'
+        applicant:
+          $ref: '#/components/schemas/ProfileResponse'
+
+    ApplicationDetailWithOrganizerResponse:
+      type: object
+      properties:
+        application:
+          $ref: '#/components/schemas/ApplicationResponse'
+        organizer:
+          $ref: '#/components/schemas/ProfileResponse'
+
+    PageableResponseEventResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        hasNext:
+          type: boolean
+          description: Есть ли следующая страница
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+        totalElements:
+          type: integer
+          format: int64
+          description: Общее количество элементов
+
+    PageableResponseNotification:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        hasNext:
+          type: boolean
+          description: Есть ли следующая страница
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+        totalElements:
+          type: integer
+          format: int64
+          description: Общее количество элементов
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
