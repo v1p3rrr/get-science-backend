@@ -4,6 +4,7 @@ import com.getscience.getsciencebackend.event.data.model.Event
 import com.getscience.getsciencebackend.event.data.model.EventFormat
 import com.getscience.getsciencebackend.event.data.model.EventType
 import com.getscience.getsciencebackend.monitoring.LogBusinessOperation
+import jakarta.annotation.PostConstruct
 import jakarta.transaction.Transactional
 import net.fortuna.ical4j.data.CalendarOutputter
 import net.fortuna.ical4j.model.Calendar
@@ -23,6 +24,12 @@ class ExportGeneratorServiceImpl(
 ) : ExportGeneratorService {
 
     private val uidGenerator = RandomUidGenerator()
+    
+    @PostConstruct
+    fun init() {
+        // Устанавливаем headless режим для Java AWT
+        System.setProperty("java.awt.headless", "true")
+    }
 
     /**
      * Генерирует iCalendar файл для указанного мероприятия.
@@ -242,13 +249,11 @@ class ExportGeneratorServiceImpl(
             row.createCell(7).setCellValue(application.verdict ?: "")
         }
 
-        // Автоматически настраиваем ширину столбцов
+        // Устанавливаем фиксированную ширину столбцов вместо autoSizeColumn
+        // для избежания использования AWT/X11 в headless окружении
+        val columnWidths = intArrayOf(15, 20, 30, 15, 20, 30, 15, 25)
         for (i in headers.indices) {
-            if (i == 5) { // Для колонки с сообщением ограничиваем ширину
-                sheet.setColumnWidth(i, 30 * 256) // примерно 30 символов
-            } else {
-                sheet.autoSizeColumn(i)
-            }
+            sheet.setColumnWidth(i, columnWidths[i] * 256) // 256 - множитель для конвертации в единицы POI
         }
 
         // Сохраняем в ByteArray
