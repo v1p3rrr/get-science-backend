@@ -58,6 +58,7 @@ class SecurityConfig(
             .authorizeHttpRequests { auth: AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry ->
                 auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers("/ws/chat/**").permitAll()
                     .requestMatchers("/api/v1/files/**").authenticated()
                     .anyRequest().permitAll()
             }

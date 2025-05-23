@@ -123,7 +123,7 @@ class AccountServiceImpl(
      *
      * Результат кэшируется с использованием email в качестве ключа.
      */
-    @Cacheable("profile", key = "#email")
+    @Cacheable("profileDto", key = "#email")
     override fun findProfileDTOByEmail(email: String): ProfileDTO? {
         return profileRepository.findByAccountEmail(email)?.let { ProfileDTO.fromEntity(it) }
     }
