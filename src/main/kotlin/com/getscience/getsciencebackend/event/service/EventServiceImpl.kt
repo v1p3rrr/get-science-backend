@@ -94,7 +94,7 @@ class EventServiceImpl(
     }
 
     @LogBusinessOperation(operationType = "EVENT_UPDATE", description = "Обновление мероприятия")
-    @CachePut(value = ["events"], key="#eventId", unless = "#result == null && #result == false")
+    @CacheEvict(value = ["events"], key="#eventId")
     override fun updateEvent(eventId: Long, eventRequest: EventRequest, email: String): Long {
         val profile = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("User not found")
@@ -179,7 +179,7 @@ class EventServiceImpl(
     }
 
     @LogBusinessOperation(operationType = "EVENT_UPDATE_WITH_FILES", description = "Обновление мероприятия с файлами")
-    @CachePut(value = ["events"], key="#eventId", unless = "#result == null && #result == false")
+    @CacheEvict(value = ["events"], key="#eventId")
     override fun updateEventWithFiles(
         eventId: Long,
         eventRequest: EventRequest,
