@@ -25,7 +25,7 @@ interface EventService {
      * @param email email пользователя, создающего мероприятие
      * @return true, если мероприятие успешно создано, иначе false
      */
-    fun createEvent(eventRequest: EventRequest, email: String): Boolean
+    fun createEvent(eventRequest: EventRequest, email: String): Long
     
     /**
      * Создает новое мероприятие с прикрепленными файлами.
@@ -36,7 +36,7 @@ interface EventService {
      * @param email email пользователя, создающего мероприятие
      * @return true, если мероприятие успешно создано, иначе false
      */
-    fun createEventWithFiles(eventRequest: EventRequest, fileEventRequestList: List<FileEventRequest>, files: List<MultipartFile>, email: String): Boolean
+    fun createEventWithFiles(eventRequest: EventRequest, fileEventRequestList: List<FileEventRequest>, files: List<MultipartFile>, email: String): Long
     
     /**
      * Обновляет существующее мероприятие.
@@ -46,7 +46,7 @@ interface EventService {
      * @param email email пользователя, обновляющего мероприятие
      * @return true, если мероприятие успешно обновлено, иначе false
      */
-    fun updateEvent(eventId: Long, eventRequest: EventRequest, email: String): Boolean
+    fun updateEvent(eventId: Long, eventRequest: EventRequest, email: String): Long
     
     /**
      * Обновляет существующее мероприятие с обновлением прикрепленных файлов.
@@ -58,7 +58,7 @@ interface EventService {
      * @param email email пользователя, обновляющего мероприятие
      * @return true, если мероприятие успешно обновлено, иначе false
      */
-    fun updateEventWithFiles(eventId: Long, eventRequest: EventRequest, fileEventRequestList: List<FileEventRequest>, files: List<MultipartFile>, email: String): Boolean
+    fun updateEventWithFiles(eventId: Long, eventRequest: EventRequest, fileEventRequestList: List<FileEventRequest>, files: List<MultipartFile>, email: String): Long
     
     /**
      * Получает информацию о мероприятии по его идентификатору.

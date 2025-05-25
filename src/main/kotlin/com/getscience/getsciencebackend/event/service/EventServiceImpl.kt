@@ -51,14 +51,14 @@ class EventServiceImpl(
 
     @LogBusinessOperation(operationType = "EVENT_CREATE", description = "Создание нового мероприятия")
     @CachePut(value = ["events"], unless = "#result == null && #result == false")
-    override fun createEvent(eventRequest: EventRequest, email: String): Boolean {
+    override fun createEvent(eventRequest: EventRequest, email: String): Long {
         val organizer = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("Organizer not found")
         val reviewerProfiles = eventRequest.reviewers.mapNotNull { it.email.let(profileRepository::findByAccountEmail) }
         val coownerProfiles = eventRequest.coowners.mapNotNull { it.email.let(profileRepository::findByAccountEmail) }.toSet()
         val event = eventRequest.toEntity(organizer, reviewerProfiles, coownerProfiles)
-        eventRepository.save(event)
-        return true
+        val savedEvent = eventRepository.save(event)
+        return savedEvent.eventId
     }
 
     @LogBusinessOperation(operationType = "EVENT_CREATE_WITH_FILES", description = "Создание нового мероприятия с файлами")
@@ -68,7 +68,7 @@ class EventServiceImpl(
         fileEventRequestList: List<FileEventRequest>,
         files: List<MultipartFile>,
         email: String
-    ): Boolean {
+    ): Long {
         val organizer = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("Organizer not found")
         val reviewerProfiles = eventRequest.reviewers.mapNotNull { it.email.let(profileRepository::findByAccountEmail) }
@@ -90,12 +90,12 @@ class EventServiceImpl(
             eventRepository.save(savedEvent)
         }
         
-        return true
+        return savedEvent.eventId
     }
 
     @LogBusinessOperation(operationType = "EVENT_UPDATE", description = "Обновление мероприятия")
     @CachePut(value = ["events"], key="#eventId", unless = "#result == null && #result == false")
-    override fun updateEvent(eventId: Long, eventRequest: EventRequest, email: String): Boolean {
+    override fun updateEvent(eventId: Long, eventRequest: EventRequest, email: String): Long {
         val profile = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("User not found")
         val event = eventRepository.findById(eventId).orElseThrow {
@@ -175,7 +175,7 @@ class EventServiceImpl(
 
         chatService.updateChatParticipantsByEventId(event.eventId)
 
-        return true
+        return event.eventId
     }
 
     @LogBusinessOperation(operationType = "EVENT_UPDATE_WITH_FILES", description = "Обновление мероприятия с файлами")
@@ -186,7 +186,7 @@ class EventServiceImpl(
         fileEventRequestList: List<FileEventRequest>,
         files: List<MultipartFile>,
         email: String
-    ): Boolean {
+    ): Long {
         val profile = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("User not found")
         val event = eventRepository.findById(eventId).orElseThrow {
@@ -281,7 +281,7 @@ class EventServiceImpl(
 
         chatService.updateChatParticipantsByEventId(savedEvent.eventId)
 
-        return true
+        return savedEvent.eventId
     }
 
     @LogBusinessOperation(operationType = "EVENT_GET_BY_ID", description = "Получение мероприятия по ID")

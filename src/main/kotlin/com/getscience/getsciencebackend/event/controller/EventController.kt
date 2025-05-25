@@ -38,14 +38,10 @@ class EventController(
         @RequestPart eventRequest: EventRequest,
         @RequestPart fileEventRequest: List<FileEventRequest>?,
         @RequestPart("files") files: List<MultipartFile>?
-    ): ResponseEntity<String> {
+    ): ResponseEntity<Long> {
         val email = getEmailFromToken()
         val result = eventService.createEventWithFiles(eventRequest, fileEventRequest ?: emptyList(), files ?: emptyList(), email)
-        return if (result) {
-            ResponseEntity.ok("Success")
-        } else {
-            ResponseEntity.badRequest().build()
-        }
+        return ResponseEntity.ok(result)
     }
 
     /**
@@ -63,14 +59,10 @@ class EventController(
         @RequestPart eventRequest: EventRequest,
         @RequestPart fileEventRequest: List<FileEventRequest>?,
         @RequestPart("files") files: List<MultipartFile>?
-    ): ResponseEntity<String> {
+    ): ResponseEntity<Long> {
         val email = getEmailFromToken()
         val result = eventService.updateEventWithFiles(eventId, eventRequest, fileEventRequest ?: emptyList(), files ?: emptyList(), email)
-        return if (result) {
-            ResponseEntity.ok("Success")
-        } else {
-            ResponseEntity.badRequest().build()
-        }
+        return ResponseEntity.ok(result)
     }
 
     /**

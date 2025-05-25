@@ -12,8 +12,8 @@ data class Chat(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
-    @OneToOne
-    @JoinColumn(name = "event_id", referencedColumnName = "eventId", unique = true)
+    @ManyToOne
+    @JoinColumn(name = "event_id", referencedColumnName = "eventId", unique = false)
     val event: Event,
 
     @ManyToOne
