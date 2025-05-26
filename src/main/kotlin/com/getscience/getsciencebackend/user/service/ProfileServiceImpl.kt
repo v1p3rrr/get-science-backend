@@ -6,6 +6,7 @@ import com.getscience.getsciencebackend.user.data.dto.ProfileRequest
 import com.getscience.getsciencebackend.user.data.dto.ProfileResponse
 import com.getscience.getsciencebackend.user.repository.AccountRepository
 import com.getscience.getsciencebackend.user.repository.ProfileRepository
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -69,6 +70,7 @@ class ProfileServiceImpl(
      * если в запросе он не указан.
      */
     @LogBusinessOperation(operationType = "PROFILE_UPDATE", description = "Обновление профиля пользователя")
+    @CacheEvict(value = ["profile", "profileDto"], allEntries = true)
     @CachePut("profile", key = "#email")
     override fun updateProfile(profile: ProfileRequest, email: String): ProfileResponse {
         val account = accountRepository.findByEmail(email)
@@ -148,6 +150,7 @@ class ProfileServiceImpl(
      * обновляет URL аватара в профиле и кэширует результат.
      */
     @LogBusinessOperation(operationType = "PROFILE_AVATAR_UPLOAD", description = "Загрузка аватара профиля")
+    @CacheEvict(value = ["profile", "profileDto"], allEntries = true)
     @CachePut("profile", key = "#email")
     override fun uploadAvatar(file: MultipartFile, email: String): ProfileResponse {
         val existingProfile = profileRepository.findByAccountEmail(email)

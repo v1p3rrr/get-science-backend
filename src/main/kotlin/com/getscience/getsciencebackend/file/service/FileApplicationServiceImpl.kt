@@ -34,6 +34,7 @@ class FileApplicationServiceImpl(
 
     @LogBusinessOperation(operationType = "APP_FILE_UPLOAD", description = "Загрузка файлов для заявки")
     @Transactional
+    @CacheEvict(value = ["fileApplications", "fileApplicationsByApplication"], allEntries = true)
     override fun uploadFiles(
         files: List<MultipartFile>,
         application: Application,
@@ -62,6 +63,7 @@ class FileApplicationServiceImpl(
     }
 
     @LogBusinessOperation(operationType = "APP_FILE_CREATE_METADATA", description = "Создание метаданных файла заявки")
+    @CacheEvict(value = ["fileApplications", "fileApplicationsByApplication"], allEntries = true)
     @CachePut(value = ["fileApplications"], key = "#result.fileId", unless = "#result == null")
     override fun createFileApplication(
         fileApplicationRequest: FileApplicationRequest,
@@ -96,7 +98,7 @@ class FileApplicationServiceImpl(
 
     @LogBusinessOperation(operationType = "APP_FILE_DELETE", description = "Удаление файла заявки")
     @Transactional
-    @CacheEvict(value = ["fileApplications", "fileApplicationsByApplication"], key = "#fileId")
+    @CacheEvict(value = ["fileApplications", "fileApplicationsByApplication"], allEntries = true)
     override fun deleteFileApplication(fileId: Long, email: String): Boolean {
         val fileApplication = verifyFileAccessRightsAndGetFileApplication(fileId, email)
         
@@ -114,6 +116,7 @@ class FileApplicationServiceImpl(
     
     @LogBusinessOperation(operationType = "APP_FILES_DELETE_BY_DOC_REQ", description = "Удаление файлов заявки по ID требуемого документа")
     @Transactional
+    @CacheEvict(value = ["fileApplications", "fileApplicationsByApplication"], allEntries = true)
     override fun deleteFileApplicationsByDocRequiredId(applicationId: Long, docRequiredId: Long, email: String): Boolean {
         val application = applicationRepository.findById(applicationId)
             .orElseThrow { RuntimeException("Application not found") }

@@ -50,6 +50,7 @@ class EventServiceImpl(
     private val logger = KotlinLogging.logger {}
 
     @LogBusinessOperation(operationType = "EVENT_CREATE", description = "Создание нового мероприятия")
+    @CacheEvict(value = ["events", "eventsByOrganizer", "fileEvents", "fileEventsByEvent"], allEntries = true)
     @CachePut(value = ["events"], unless = "#result == null && #result == false")
     override fun createEvent(eventRequest: EventRequest, email: String): Long {
         val organizer = profileRepository.findByAccountEmail(email)
@@ -62,6 +63,7 @@ class EventServiceImpl(
     }
 
     @LogBusinessOperation(operationType = "EVENT_CREATE_WITH_FILES", description = "Создание нового мероприятия с файлами")
+    @CacheEvict(value = ["events", "eventsByOrganizer", "fileEvents", "fileEventsByEvent"], allEntries = true)
     @CachePut(value = ["events"], unless = "#result == null && #result == false")
     override fun createEventWithFiles(
         eventRequest: EventRequest,
@@ -94,7 +96,7 @@ class EventServiceImpl(
     }
 
     @LogBusinessOperation(operationType = "EVENT_UPDATE", description = "Обновление мероприятия")
-    @CacheEvict(value = ["events"], key="#eventId")
+    @CacheEvict(value = ["events", "eventsByOrganizer", "fileEvents", "fileEventsByEvent"], allEntries = true)
     override fun updateEvent(eventId: Long, eventRequest: EventRequest, email: String): Long {
         val profile = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("User not found")
@@ -179,7 +181,7 @@ class EventServiceImpl(
     }
 
     @LogBusinessOperation(operationType = "EVENT_UPDATE_WITH_FILES", description = "Обновление мероприятия с файлами")
-    @CacheEvict(value = ["events"], key="#eventId")
+    @CacheEvict(value = ["events", "eventsByOrganizer", "fileEvents", "fileEventsByEvent"], allEntries = true)
     override fun updateEventWithFiles(
         eventId: Long,
         eventRequest: EventRequest,
@@ -336,7 +338,7 @@ class EventServiceImpl(
     }
 
     @LogBusinessOperation(operationType = "EVENT_DELETE", description = "Удаление мероприятия")
-    @CacheEvict(value = ["events"], key = "#eventId", condition = "#result != null")
+    @CacheEvict(value = ["events", "eventsByOrganizer", "fileEvents", "fileEventsByEvent"], allEntries = true, condition = "#result != null")
     override fun deleteEvent(eventId: Long, email: String): Boolean {
         val profile = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("User not found")

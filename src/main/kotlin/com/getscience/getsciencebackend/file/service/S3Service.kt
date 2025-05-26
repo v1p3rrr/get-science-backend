@@ -85,9 +85,7 @@ class S3Service(
         
         // Если указано имя файла, добавляем заголовок Content-Disposition через параметры запроса
         if (!originalFileName.isNullOrBlank()) {
-            val sanitizedFilename = originalFileName
-                .replace("[^A-Za-z0-9._-]".toRegex(), "_") // Заменяем недопустимые символы
-                .trim()
+            val sanitizedFilename = sanitizeFileName(originalFileName)
 
 
             // В SDK v2 заголовки ответа задаются через query параметры в URL
@@ -196,9 +194,14 @@ class S3Service(
      * @return очищенное имя файла
      */
     private fun sanitizeFileName(fileName: String): String {
-        return fileName
-            .replace("[^A-Za-z0-9._-]".toRegex(), "_") // Заменяем недопустимые символы
-            .trim()
+        val lastDot = fileName.lastIndexOf('.')
+        return if (lastDot > 0 && lastDot < fileName.length - 1) {
+            val name = fileName.substring(0, lastDot)
+            val ext = fileName.substring(lastDot)
+            name.replace("[^A-Za-z0-9._-]".toRegex(), "_") + ext.replace("[^A-Za-z0-9.]".toRegex(), "")
+        } else {
+            fileName.replace("[^A-Za-z0-9._-]".toRegex(), "_")
+        }
     }
 
     /**

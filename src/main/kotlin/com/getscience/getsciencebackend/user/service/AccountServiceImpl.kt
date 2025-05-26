@@ -15,6 +15,7 @@ import com.getscience.getsciencebackend.user.data.model.*
 import com.getscience.getsciencebackend.user.repository.*
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -46,6 +47,7 @@ class AccountServiceImpl(
      */
     @LogBusinessOperation(operationType = "USER_REGISTRATION", description = "Регистрация нового пользователя")
     @Transactional
+    @CacheEvict(value = ["profile", "profileDto"], allEntries = true)
     override fun registerUser(registerRequest: RegisterRequest, locale: Locale): Account {
         accountRepository.findByEmail(registerRequest.email)?.let {
             throw IllegalArgumentException("User with email ${registerRequest.email} already exists")

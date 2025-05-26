@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.net.URL
 import org.springframework.web.multipart.MultipartFile
 import java.sql.Timestamp
+import org.springframework.cache.annotation.CacheEvict
 
 @Service
 @Transactional
@@ -25,6 +26,7 @@ class FileEventServiceImpl(
     private val logger = KotlinLogging.logger {}
 
     @LogBusinessOperation(operationType = "EVENT_FILE_CREATE_METADATA", description = "Создание метаданных файла мероприятия")
+    @CacheEvict(value = ["fileEvents", "fileEventsByEvent"], allEntries = true)
     @CachePut(value = ["fileEvents"], key = "#result.id", unless = "#result == null")
     override fun createFileEvent(fileEventRequest: FileEventRequest, event: Event): FileEvent {
         val fileEvent = fileEventRequest.toEntity(event)
@@ -65,6 +67,7 @@ class FileEventServiceImpl(
 
     @LogBusinessOperation(operationType = "EVENT_FILES_UPLOAD", description = "Загрузка файлов для мероприятия")
     @Transactional
+    @CacheEvict(value = ["fileEvents", "fileEventsByEvent"], allEntries = true)
     override fun uploadFiles(
         files: List<MultipartFile>,
         event: Event,
@@ -98,6 +101,7 @@ class FileEventServiceImpl(
 
     @LogBusinessOperation(operationType = "EVENT_FILE_DELETE", description = "Удаление файла мероприятия")
     @Transactional
+    @CacheEvict(value = ["fileEvents", "fileEventsByEvent"], allEntries = true)
     override fun deleteFileEvent(fileId: Long, email: String): Boolean {
         val fileEvent = checkRightsAndGetFileEvent(fileId, email)
 
@@ -115,6 +119,7 @@ class FileEventServiceImpl(
 
     @LogBusinessOperation(operationType = "EVENT_FILE_UPDATE_METADATA", description = "Обновление метаданных файла мероприятия")
     @Transactional
+    @CacheEvict(value = ["fileEvents", "fileEventsByEvent"], allEntries = true)
     override fun updateFileEvent(fileId: Long, updatedFileRequest: FileEventRequest, email: String): FileEventResponse {
         val fileEvent = checkRightsAndGetFileEvent(fileId, email)
 

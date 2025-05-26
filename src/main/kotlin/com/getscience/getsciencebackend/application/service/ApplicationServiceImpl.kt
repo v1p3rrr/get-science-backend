@@ -48,6 +48,7 @@ class ApplicationServiceImpl(
      */
     @LogBusinessOperation(operationType = "APPLICATION_CREATE", description = "Создание новой заявки")
     @Transactional
+    @CacheEvict(value = ["applications", "applicationsByProfile", "applicationsByEvent", "applicationsByOrganizer", "applicationDetail"], allEntries = true)
     @CachePut(value = ["applications"], key = "#result.applicationId", unless = "#result == null")
     override fun createApplication(
         applicationRequest: ApplicationRequest,
@@ -106,6 +107,7 @@ class ApplicationServiceImpl(
      */
     @LogBusinessOperation(operationType = "APPLICATION_UPDATE", description = "Обновление заявки пользователем")
     @Transactional
+    @CacheEvict(value = ["applications", "applicationsByProfile", "applicationsByEvent", "applicationsByOrganizer", "applicationDetail"], allEntries = true)
     @CachePut(value = ["applications"], key = "#applicationId", unless = "#result == null")
     override fun updateApplication(applicationId: Long,
                           applicationRequest: ApplicationRequest,
@@ -197,6 +199,7 @@ class ApplicationServiceImpl(
      */
     @LogBusinessOperation(operationType = "APPLICATION_UPDATE_BY_ORGANIZER", description = "Обновление заявки организатором")
     @Transactional
+    @CacheEvict(value = ["applications", "applicationsByProfile", "applicationsByEvent", "applicationsByOrganizer", "applicationDetail"], allEntries = true)
     @CachePut(value = ["applications"], key = "#applicationId", unless = "#result == null")
     override fun updateApplicationByOrganizer(
         applicationId: Long,
@@ -412,11 +415,7 @@ class ApplicationServiceImpl(
      */
     @LogBusinessOperation(operationType = "APPLICATION_DELETE", description = "Удаление заявки")
     @Transactional
-    @CacheEvict(
-        value = ["applications", "applicationsByProfile", "applicationsByEvent", "applicationDetail"],
-        allEntries = true,
-        condition = "#result != null && #result == true"
-    )
+    @CacheEvict(value = ["applications", "applicationsByProfile", "applicationsByEvent", "applicationsByOrganizer", "applicationDetail"], allEntries = true, condition = "#result != null && #result == true")
     override fun deleteApplication(applicationId: Long, email: String): Boolean {
         val applicant = profileRepository.findByAccountEmail(email)
             ?: throw IllegalArgumentException("Applicant not found")
